@@ -1,0 +1,21 @@
+{
+    "full_name": "Jeanine Erni",
+    "name": "Jeanine",
+    "current_role": "Fachspezialistin Accounting",
+    "location": "Zürich, Switzerland",
+    "email": "jeanine@gmail.com",
+    "linkedin": "https://www.linkedin.com/in/jeanine-erni-76a90248",
+    "specialties": [
+      "Finanzen",
+      "Rechnungswesen",
+      "Schulwesen"
+    ],
+    "years_experience": 20,
+    "education": [
+      {
+        "degree": "Betriebswirtschafterin HF",
+        "institution": "KV Zürich Business School",
+        "year": "2009"
+      }
+    ]
+}

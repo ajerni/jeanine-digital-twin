@@ -1,10 +1,7 @@
-// Import data files directly at build time
-import factsJson from '../data/facts.json';
-import linkedinTxt from '../data/linkedin.txt';
-import summaryTxt from '../data/summary.txt';
-import styleTxt from '../data/style.txt';
+import { readFileSync } from 'fs';
+import { join } from 'path';
 
-// Cache for loaded resources  
+// Cache for loaded resources
 let cachedResources: {
   linkedin: string;
   summary: string;
@@ -18,16 +15,26 @@ export async function loadResources() {
     return cachedResources;
   }
 
+  const dataDir = join(process.cwd(), 'lib', 'data');
+
   try {
-    // Use imported data directly
+    // Read text files
+    const linkedin = readFileSync(join(dataDir, 'linkedin.txt'), 'utf-8');
+    const summary = readFileSync(join(dataDir, 'summary.txt'), 'utf-8');
+    const style = readFileSync(join(dataDir, 'style.txt'), 'utf-8');
+
+    // Read JSON file
+    const factsData = readFileSync(join(dataDir, 'facts.json'), 'utf-8');
+    const facts = JSON.parse(factsData);
+
+    // Cache the resources
     cachedResources = {
-      linkedin: linkedinTxt as string,
-      summary: summaryTxt as string,
-      style: styleTxt as string,
-      facts: factsJson as Record<string, unknown>,
+      linkedin,
+      summary,
+      style,
+      facts,
     };
 
-    console.log('Resources loaded successfully from imports');
     return cachedResources;
   } catch (error) {
     console.error('Error loading resources:', error);
