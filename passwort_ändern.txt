@@ -1,0 +1,9 @@
+cd frontend
+npm run generate-password
+CHAT_PASSWORD_HASH in .env.local anpassen:
+CHAT_PASSWORD_HASH=\$2b\$10\$me (vor jedes $ Zeichen einen \ machen, sonst truncatinationg issues)
+
+***
+
+Daten unter app/lib/data --> dann npm run build & npm run dev
+
