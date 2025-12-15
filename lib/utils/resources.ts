@@ -1,6 +1,5 @@
 import fs from 'fs';
 import path from 'path';
-import * as pdfParse from 'pdf-parse';
 
 // Cache for loaded resources
 let cachedResources: {
@@ -19,16 +18,20 @@ export async function loadResources() {
   const dataDir = path.join(process.cwd(), 'lib', 'data');
 
   try {
-    // Read LinkedIn PDF
+    // Read LinkedIn data - try text file first, then fallback
     let linkedin = '';
     try {
-      const pdfPath = path.join(dataDir, 'linkedin.pdf');
-      const dataBuffer = fs.readFileSync(pdfPath);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const pdfData = await (pdfParse as any)(dataBuffer);
-      linkedin = pdfData.text;
+      // Try to read linkedin.txt if it exists
+      const linkedinTxtPath = path.join(dataDir, 'linkedin.txt');
+      if (fs.existsSync(linkedinTxtPath)) {
+        linkedin = fs.readFileSync(linkedinTxtPath, 'utf-8');
+      } else {
+        // Fallback message if no LinkedIn data available
+        console.warn('LinkedIn text file not found');
+        linkedin = 'LinkedIn profile information not available in this format.';
+      }
     } catch (error) {
-      console.warn('LinkedIn PDF not found or could not be read:', error);
+      console.warn('LinkedIn data could not be read:', error);
       linkedin = 'LinkedIn profile not available';
     }
 

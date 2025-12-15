@@ -1,0 +1,11 @@
+Jeanine Erni - LinkedIn Profile
+
+[Note: PDF parsing library removed due to Vercel deployment issues. Please manually extract LinkedIn PDF content and replace this file.]
+
+Professional Experience:
+- Software Engineer and Technical Leader
+- Expertise in web development and AI/ML technologies
+- Based in Switzerland
+
+For full LinkedIn profile details, please refer to the summary and facts data.
+
