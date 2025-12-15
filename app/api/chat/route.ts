@@ -4,6 +4,9 @@ import { buildPrompt } from '@/lib/utils/context';
 import { loadConversation, saveConversation } from '@/lib/utils/storage';
 import { randomUUID } from 'crypto';
 
+// Force Node.js runtime for Vercel (needed for crypto and file system operations)
+export const runtime = 'nodejs';
+
 // Model to use (OpenRouter format: provider/model-name)
 // Examples: 'openai/gpt-4-turbo', 'anthropic/claude-3-opus', 'meta-llama/llama-3-70b'
 const MODEL = process.env.OPENAI_MODEL || 'openai/gpt-4o-mini';
@@ -22,6 +25,20 @@ interface ChatMessage {
   timestamp: string;
 }
 
+// CORS headers helper
+function corsHeaders() {
+  return {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type',
+  };
+}
+
+// Handle OPTIONS for CORS preflight
+export async function OPTIONS() {
+  return NextResponse.json({}, { headers: corsHeaders() });
+}
+
 export async function POST(request: NextRequest) {
   try {
     const { message, session_id } = await request.json();
@@ -29,7 +46,7 @@ export async function POST(request: NextRequest) {
     if (!message) {
       return NextResponse.json(
         { error: 'Message is required' },
-        { status: 400 }
+        { status: 400, headers: corsHeaders() }
       );
     }
 
@@ -99,7 +116,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       response: assistantResponse,
       session_id: sessionId,
-    });
+    }, { headers: corsHeaders() });
   } catch (error) {
     console.error('Error in chat endpoint:', error);
     
@@ -108,14 +125,14 @@ export async function POST(request: NextRequest) {
       if (error.message.includes('API key')) {
         return NextResponse.json(
           { error: 'OpenAI API key not configured' },
-          { status: 500 }
+          { status: 500, headers: corsHeaders() }
         );
       }
     }
     
     return NextResponse.json(
       { error: 'Failed to process chat message' },
-      { status: 500 }
+      { status: 500, headers: corsHeaders() }
     );
   }
 }

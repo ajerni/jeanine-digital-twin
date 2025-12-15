@@ -1,7 +1,12 @@
 cd frontend
 npm run generate-password
 CHAT_PASSWORD_HASH in .env.local anpassen:
+
+Lokal:
 CHAT_PASSWORD_HASH=\$2b\$10\$me (vor jedes $ Zeichen einen \ machen, sonst truncatinationg issues)
+
+Prod:
+Env vars auf Vercel: ohne die \ vor den $ Zeichen
 
 ***
 

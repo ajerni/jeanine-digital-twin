@@ -1,6 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 
+// Force Node.js runtime for Vercel
+export const runtime = 'nodejs';
+
+// CORS headers helper
+function corsHeaders() {
+  return {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type',
+  };
+}
+
+// Handle OPTIONS for CORS preflight
+export async function OPTIONS() {
+  return NextResponse.json({}, { headers: corsHeaders() });
+}
+
 export async function POST(request: NextRequest) {
   try {
     const { password } = await request.json();
@@ -8,7 +25,7 @@ export async function POST(request: NextRequest) {
     if (!password) {
       return NextResponse.json(
         { valid: false, message: 'Password is required' },
-        { status: 400 }
+        { status: 400, headers: corsHeaders() }
       );
     }
 
@@ -27,7 +44,7 @@ export async function POST(request: NextRequest) {
       console.error('CHAT_PASSWORD_HASH environment variable not set');
       return NextResponse.json(
         { valid: false, message: 'Password authentication not configured' },
-        { status: 500 }
+        { status: 500, headers: corsHeaders() }
       );
     }
 
@@ -40,18 +57,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         valid: true,
         message: 'Access granted',
-      });
+      }, { headers: corsHeaders() });
     } else {
       return NextResponse.json({
         valid: false,
         message: 'Invalid password',
-      });
+      }, { headers: corsHeaders() });
     }
   } catch (error) {
     console.error('Error in password validation:', error);
     return NextResponse.json(
       { valid: false, message: 'Password validation failed' },
-      { status: 500 }
+      { status: 500, headers: corsHeaders() }
     );
   }
 }
