@@ -123,19 +123,27 @@ export async function POST(request: NextRequest) {
     }, { headers: corsHeaders() });
   } catch (error) {
     console.error('Error in chat endpoint:', error);
+    console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
+    console.error('Error details:', JSON.stringify(error, Object.getOwnPropertyNames(error)));
     
     // Provide more specific error messages
     if (error instanceof Error) {
       if (error.message.includes('API key')) {
         return NextResponse.json(
-          { error: 'OpenAI API key not configured' },
+          { error: 'OpenAI API key not configured', details: error.message },
           { status: 500, headers: corsHeaders() }
         );
       }
+      
+      // Return actual error message in development/for debugging
+      return NextResponse.json(
+        { error: 'Failed to process chat message', details: error.message, name: error.name },
+        { status: 500, headers: corsHeaders() }
+      );
     }
     
     return NextResponse.json(
-      { error: 'Failed to process chat message' },
+      { error: 'Failed to process chat message', details: 'Unknown error' },
       { status: 500, headers: corsHeaders() }
     );
   }
