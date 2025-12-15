@@ -1,5 +1,5 @@
-import fs from 'fs';
-import path from 'path';
+import { readFileSync } from 'fs';
+import { join, resolve } from 'path';
 
 // Cache for loaded resources
 let cachedResources: {
@@ -15,32 +15,39 @@ export async function loadResources() {
     return cachedResources;
   }
 
-  const dataDir = path.join(process.cwd(), 'lib', 'data');
-
   try {
-    // Read LinkedIn data - try text file first, then fallback
+    // Try multiple path resolutions for compatibility with different environments
+    let dataDir: string;
+    
+    // First try: relative to current working directory (works in dev and most builds)
+    dataDir = join(process.cwd(), 'lib', 'data');
+    
+    // Check if path exists, if not try alternative
+    try {
+      readFileSync(join(dataDir, 'facts.json'), 'utf-8');
+    } catch {
+      // Second try: relative path from this module (for bundled serverless functions)
+      dataDir = resolve(__dirname, '..', 'data');
+    }
+
+    console.log('Loading resources from:', dataDir);
+
+    // Read LinkedIn data
     let linkedin = '';
     try {
-      // Try to read linkedin.txt if it exists
-      const linkedinTxtPath = path.join(dataDir, 'linkedin.txt');
-      if (fs.existsSync(linkedinTxtPath)) {
-        linkedin = fs.readFileSync(linkedinTxtPath, 'utf-8');
-      } else {
-        // Fallback message if no LinkedIn data available
-        console.warn('LinkedIn text file not found');
-        linkedin = 'LinkedIn profile information not available in this format.';
-      }
+      const linkedinTxtPath = join(dataDir, 'linkedin.txt');
+      linkedin = readFileSync(linkedinTxtPath, 'utf-8');
     } catch (error) {
       console.warn('LinkedIn data could not be read:', error);
       linkedin = 'LinkedIn profile not available';
     }
 
     // Read text files
-    const summary = fs.readFileSync(path.join(dataDir, 'summary.txt'), 'utf-8');
-    const style = fs.readFileSync(path.join(dataDir, 'style.txt'), 'utf-8');
+    const summary = readFileSync(join(dataDir, 'summary.txt'), 'utf-8');
+    const style = readFileSync(join(dataDir, 'style.txt'), 'utf-8');
 
     // Read JSON file
-    const factsData = fs.readFileSync(path.join(dataDir, 'facts.json'), 'utf-8');
+    const factsData = readFileSync(join(dataDir, 'facts.json'), 'utf-8');
     const facts = JSON.parse(factsData);
 
     // Cache the resources
@@ -51,9 +58,14 @@ export async function loadResources() {
       facts,
     };
 
+    console.log('Resources loaded successfully');
     return cachedResources;
   } catch (error) {
     console.error('Error loading resources:', error);
+    console.error('Tried paths:', [
+      join(process.cwd(), 'lib', 'data'),
+      resolve(__dirname, '..', 'data')
+    ]);
     throw new Error('Failed to load resources');
   }
 }
