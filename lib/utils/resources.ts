@@ -18,8 +18,15 @@ export async function loadResources() {
   const dataDir = join(process.cwd(), 'lib', 'data');
 
   try {
-    // Read text files
-    const linkedin = readFileSync(join(dataDir, 'linkedin.txt'), 'utf-8');
+    // Read LinkedIn data (optional - won't crash if missing)
+    let linkedin = 'LinkedIn profile information not available.';
+    try {
+      linkedin = readFileSync(join(dataDir, 'linkedin.txt'), 'utf-8');
+    } catch (error) {
+      console.warn('LinkedIn data not found, using fallback');
+    }
+
+    // Read required text files
     const summary = readFileSync(join(dataDir, 'summary.txt'), 'utf-8');
     const style = readFileSync(join(dataDir, 'style.txt'), 'utf-8');
 
