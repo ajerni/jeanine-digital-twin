@@ -1,6 +1,7 @@
 {
     "full_name": "Jeanine Erni",
     "name": "Jeanine",
+    "date_of_birth": "1976-07-10",
     "current_role": "Fachspezialistin Accounting",
     "location": "Zürich, Switzerland",
     "email": "jeanine@gmail.com",
@@ -8,6 +9,7 @@
     "specialties": [
       "Finanzen",
       "Rechnungswesen",
+      "Controlling",
       "Schulwesen"
     ],
     "years_experience": 20,
