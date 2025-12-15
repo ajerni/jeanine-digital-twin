@@ -1,23 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import OpenAI from 'openai';
-import { buildPrompt } from '@/lib/utils/context';
-import { loadConversation, saveConversation } from '@/lib/utils/storage';
-import { randomUUID } from 'crypto';
 
 // Force Node.js runtime for Vercel (needed for crypto and file system operations)
 export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
 
 // Model to use (OpenRouter format: provider/model-name)
 // Examples: 'openai/gpt-4-turbo', 'anthropic/claude-3-opus', 'meta-llama/llama-3-70b'
 const MODEL = process.env.OPENAI_MODEL || 'openai/gpt-4o-mini';
-
-// Lazy initialization of OpenAI client (configured for OpenRouter)
-function getOpenAIClient() {
-  return new OpenAI({
-    apiKey: process.env.OPENROUTER_API_KEY,
-    baseURL: process.env.OPENROUTER_BASE_URL || 'https://openrouter.ai/api/v1',
-  });
-}
 
 interface ChatMessage {
   role: 'user' | 'assistant';
@@ -41,6 +30,12 @@ export async function OPTIONS() {
 
 export async function POST(request: NextRequest) {
   try {
+    // Dynamic imports to avoid build-time issues with Node.js modules
+    const { randomUUID } = await import('crypto');
+    const OpenAI = (await import('openai')).default;
+    const { buildPrompt } = await import('@/lib/utils/context');
+    const { loadConversation, saveConversation } = await import('@/lib/utils/storage');
+
     const { message, session_id } = await request.json();
 
     if (!message) {
@@ -59,8 +54,18 @@ export async function POST(request: NextRequest) {
     // Build the system prompt
     const systemPrompt = await buildPrompt();
 
+    // Initialize OpenAI client (configured for OpenRouter)
+    const openai = new OpenAI({
+      apiKey: process.env.OPENROUTER_API_KEY,
+      baseURL: process.env.OPENROUTER_BASE_URL || 'https://openrouter.ai/api/v1',
+    });
+
     // Prepare messages for OpenAI
-    const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [
+    type ChatCompletionMessage = {
+      role: 'system' | 'user' | 'assistant';
+      content: string;
+    };
+    const messages: ChatCompletionMessage[] = [
       {
         role: 'system',
         content: systemPrompt,
@@ -83,7 +88,6 @@ export async function POST(request: NextRequest) {
     });
 
     // Call OpenAI API
-    const openai = getOpenAIClient();
     const completion = await openai.chat.completions.create({
       model: MODEL,
       messages: messages,

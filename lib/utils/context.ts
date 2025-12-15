@@ -1,5 +1,3 @@
-'use server';
-
 import { loadResources } from './resources';
 
 export async function buildPrompt(): Promise<string> {
